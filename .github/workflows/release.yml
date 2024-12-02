@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # Trigger the workflow for any tag starting with "v"
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     name: Build and Release
