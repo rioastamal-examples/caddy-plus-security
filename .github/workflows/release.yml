@@ -21,20 +21,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Create a release
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          body: |
-            Automatically generated release for tag ${{ github.ref_name }}.
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
       # Set up architecture-specific environment
       - name: Set Architecture
         run: echo "ARCH=${{ matrix.arch }}" >> $GITHUB_ENV
@@ -46,14 +32,11 @@ jobs:
           export SKIP_GO_INSTALLER="no"
           export SKIP_XCADDY_INSTALLER="no"
           export GO_VERSION=1.23.3
-          export CADDY_OUTPUT="./out/caddy-${{ matrix.arch }}"
+          export CADDY_OUTPUT="./out/caddy-${{ github.ref_name }}-${{ matrix.arch }}"
           ./build.sh
 
-      # Upload built binaries as release assets
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Create Release
+        uses: ncipollo/release-action@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/caddy-${{ matrix.arch }}
-          asset_name: caddy-${{ github.ref_name }}-linux-${{ matrix.arch }}
-          asset_content_type: application/octet-stream
+          artifacts: "out/caddy-${{ github.ref_name }}-linux-${{ matrix.arch }}"
+          allowUpdates: true
