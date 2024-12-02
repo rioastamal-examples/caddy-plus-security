@@ -33,6 +33,7 @@ jobs:
           export SKIP_XCADDY_INSTALLER="no"
           export GO_VERSION=1.23.3
           export CADDY_OUTPUT="./out/caddy-${{ github.ref_name }}-linux-${{ matrix.arch }}"
+          export GOARCH=${{ matrix.arch }}
           ./build.sh
 
       # Generate the checksum file for the binary
