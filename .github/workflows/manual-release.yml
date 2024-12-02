@@ -3,6 +3,10 @@ name: Manual Build and Release Caddy with Security Plugin
 on:
   workflow_dispatch:
     inputs:
+      release_name:
+        description: "Specify the release name e.g: 'v2.8.0' or latest"
+        required: true
+        default: "v2.8.4"
       go_version:
         description: "Specify the Go version to use (e.g., 1.23.3)"
         required: true
@@ -62,14 +66,14 @@ jobs:
           export CADDY_VERSION="${{ github.event.inputs.caddy_version }}"
           export XCADDY_VERSION="${{ github.event.inputs.xcaddy_version }}"
           export SECURITY_VERSION="${{ github.event.inputs.caddy_security_version }}"
-          export CADDY_OUTPUT="./out/caddy-${{ github.ref_name }}-linux-${{ matrix.arch }}${{ github.event.inputs.output_suffix }}"
+          export CADDY_OUTPUT="./out/caddy-${{ github.event.inputs.caddy_version }}-linux-${{ matrix.arch }}${{ github.event.inputs.output_suffix }}"
           export GOARCH=${{ matrix.arch }}
           ./build.sh
 
       # Generate the checksum file for the binary
       - name: Generate Checksum
         run: |
-          caddy_binary="./out/caddy-${{ github.ref_name }}-linux-${{ matrix.arch }}${{ github.event.inputs.output_suffix }}"
+          caddy_binary="./out/caddy-${{ github.event.inputs.caddy_version }}-linux-${{ matrix.arch }}${{ github.event.inputs.output_suffix }}"
           sha256sum "$caddy_binary" > "${caddy_binary}-checksum.sha256.txt"
           echo "Checksum file created: ${caddy_binary}-checksum.sha256.txt"
 
@@ -78,3 +82,5 @@ jobs:
         with:
           artifacts: "out/caddy-*"
           allowUpdates: true
+          tag: "v${{ github.event.inputs.caddy_version }}"
+          name: "${{ github.event.inputs.release_name }}"
